@@ -1,133 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>L'Oréal Routine Builder — Product-Aware Chatbot</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="brand">
-        <span class="dot"></span>
-        <h1>L’Oréal Routine Builder</h1>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>L'Oréal Routine Builder — Product-Aware Chatbot</title>
+
+  <!-- main stylesheet (cache-busted for GitHub Pages) -->
+  <link rel="stylesheet" href="style.css?v=3" />
+
+  <!-- inline fallback so the page isn't plain white if CSS is cached somewhere -->
+  <style>
+    body{background:#0f1115;color:#fff;font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+  </style>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>L’Oréal Routine Builder</h1>
+    </div>
+
+    <div class="header-actions">
+      <button id="rtlToggle" class="ghost-btn" aria-pressed="false" title="Toggle Right-to-Left">
+        RTL: Off
+      </button>
+      <button id="clearSelections" class="ghost-btn danger" title="Clear saved selections">
+        Clear Saved
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="controls card">
+      <h2>Browse Products</h2>
+
+      <div class="filters">
+        <label class="control">
+          <span>Category</span>
+          <select id="categorySelect" aria-label="Category filter">
+            <option value="all">All</option>
+            <option value="cleanser">Cleanser</option>
+            <option value="toner">Toner</option>
+            <option value="serum">Serum</option>
+            <option value="moisturizer">Moisturizer</option>
+            <option value="sunscreen">Sunscreen</option>
+            <option value="makeup">Makeup</option>
+            <option value="haircare">Haircare</option>
+            <option value="fragrance">Fragrance</option>
+          </select>
+        </label>
+
+        <label class="control">
+          <span>Search</span>
+          <input id="searchInput" type="search" placeholder="Type to filter by name or keyword…" />
+        </label>
+
+        <label class="control checkbox">
+          <input id="liveWebToggle" type="checkbox" />
+          <span>Enable Live Web Search</span>
+        </label>
       </div>
+    </section>
 
-      <div class="header-actions">
-        <button
-          id="rtlToggle"
-          class="ghost-btn"
-          aria-pressed="false"
-          title="Toggle Right-to-Left"
-        >
-          RTL: Off
-        </button>
-        <button
-          id="clearSelections"
-          class="ghost-btn danger"
-          title="Clear saved selections"
-        >
-          Clear Saved
-        </button>
-      </div>
-    </header>
+    <section class="grid card" aria-live="polite">
+      <h2 class="sr-only">Product Grid</h2>
+      <div id="productGrid" class="product-grid"></div>
+    </section>
 
-    <main class="layout">
-      <section class="controls card">
-        <h2>Browse Products</h2>
+    <aside class="selected card">
+      <h2>Selected Products</h2>
+      <ul id="selectedList" class="selected-list"></ul>
+      <button id="generateBtn" class="primary-btn" disabled>Generate Routine</button>
+    </aside>
 
-        <div class="filters">
-          <label class="control">
-            <span>Category</span>
-            <select id="categorySelect" aria-label="Category filter">
-              <option value="all">All</option>
-              <option value="cleanser">Cleanser</option>
-              <option value="toner">Toner</option>
-              <option value="serum">Serum</option>
-              <option value="moisturizer">Moisturizer</option>
-              <option value="sunscreen">Sunscreen</option>
-              <option value="makeup">Makeup</option>
-              <option value="haircare">Haircare</option>
-              <option value="fragrance">Fragrance</option>
-            </select>
-          </label>
+    <section class="chat card">
+      <h2>Chat</h2>
+      <div id="chatWindow" class="chat-window" aria-live="polite"></div>
+      <form id="chatForm" class="chat-form">
+        <input id="chatInput" type="text" placeholder="Ask a follow-up about your routine…" autocomplete="off" />
+        <button class="primary-btn" type="submit">Send</button>
+      </form>
+      <p class="hint">The chatbot remembers this conversation and stays on skincare, haircare, makeup, and fragrance topics.</p>
+    </section>
+  </main>
 
-          <label class="control">
-            <span>Search</span>
-            <input
-              id="searchInput"
-              type="search"
-              placeholder="Type to filter by name or keyword…"
-            />
-          </label>
+  <!-- Description Modal -->
+  <dialog id="descModal" class="modal">
+    <article>
+      <header>
+        <h3 id="modalTitle">Product</h3>
+        <button id="modalClose" class="icon-btn" aria-label="Close">✕</button>
+      </header>
+      <p id="modalBody">Description</p>
+    </article>
+  </dialog>
 
-          <label class="control checkbox">
-            <input id="liveWebToggle" type="checkbox" />
-            <span>Enable Live Web Search</span>
-          </label>
-        </div>
-      </section>
+  <footer class="site-footer">
+    <p>Built for class • Brand colors #ff003b &amp; #e3a535 • Saves selections locally</p>
+  </footer>
 
-      <section class="grid card" aria-live="polite">
-        <h2 class="sr-only">Product Grid</h2>
-        <div id="productGrid" class="product-grid"></div>
-      </section>
-
-      <aside class="selected card">
-        <h2>Selected Products</h2>
-        <ul id="selectedList" class="selected-list"></ul>
-        <button id="generateBtn" class="primary-btn" disabled>
-          Generate Routine
-        </button>
-      </aside>
-
-      <section class="chat card">
-        <h2>Chat</h2>
-        <div id="chatWindow" class="chat-window" aria-live="polite"></div>
-        <form id="chatForm" class="chat-form">
-          <input
-            id="chatInput"
-            type="text"
-            placeholder="Ask a follow-up about your routine…"
-            autocomplete="off"
-          />
-          <button class="primary-btn" type="submit">Send</button>
-        </form>
-        <p class="hint">
-          The chatbot remembers this conversation and stays on skincare,
-          haircare, makeup, and fragrance topics.
-        </p>
-      </section>
-    </main>
-
-    <!-- Description Modal -->
-    <dialog id="descModal" class="modal">
-      <article>
-        <header>
-          <h3 id="modalTitle">Product</h3>
-          <button id="modalClose" class="icon-btn" aria-label="Close">✕</button>
-        </header>
-        <p id="modalBody">Description</p>
-      </article>
-    </dialog>
-
-    <footer class="site-footer">
-      <p>
-        Built for class • Brand colors #ff003b &amp; #e3a535 • Saves selections
-        locally
-      </p>
-    </footer>
-
-    <script>
-      window.APP_CONFIG = {
-        WORKER_URL: "https://YOUR-WORKER-SUBDOMAIN.workers.dev/routine",
-      };
-    </script>
-    <script src="script.js" defer></script>
-  </body>
+  <script>
+    // Leave blank unless you actually deploy a Worker.
+    window.APP_CONFIG = { WORKER_URL: "" };
+  </script>
+  <!-- script (cache-busted for GitHub Pages) -->
+  <script src="script.js?v=3" defer></script>
+</body>
 </html>
